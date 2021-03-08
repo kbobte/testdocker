@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  php-fpm-d:
+    build:
+      context: ./php-fpm
+    volumes:
+      - ../app:/var/www
+  nginx-d:
+    build:
+      context: ./nginx
+    volumes:
+      - ../app:/var/www
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites/:/etc/nginx/sites-available
+      - ./nginx/conf.d/:/etc/nginx/conf.d
+    depends_on:
+      - php-fpm-d
+    ports:
+      - "80:80"
+      - "443:443"
+  database-d:
+    build:
+      context: ./database
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - "3306:3306"
+    volumes:
+     - ./database/data.sql:/docker-entrypoint-initdb.d/data.sql
+  redis:
+    image: "redis:alpine"
